@@ -1,0 +1,15 @@
+{
+  "name": "whoknows",
+  "version": "1.0.0",
+  "description": "A fun game to play with friends and family, eah person sets a question for the rest",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

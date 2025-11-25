@@ -1,0 +1,36 @@
+// Tasks
+- sections (Users, Players, Game session)
+- Users should have roles default as player, 
+but the role of "game master" is given when you start a game, 
+and changed after a game session
+- Understand when a game session is created, ends, deleted, etc.
+- Rate limit( 3 valid attempts each, players can't join when in session)
+- Players can see number of peoplee connected and their scores
+- Game session should be like a chat interface
+- JOI for all inputs
+
+// Fields
+- Users: name, nickname
+- Players: 
+userID (populate: name), attempts(def = 3), trial, score (def = 0)
+- Game session: 
+name, [playersID], game masterID, time (def= 60), question (only game master),
+answer (only game master), status (pending, in progress, ended (WHEN- player gets answer i.e. trial = answer Or time 
+60sec exp... THEN another player is game master)) 
+
+
+// Routes
+- User: 
+Post-Signup
+Post-Login
+- Players: 
+
+put-attempt (reduce trial and check if they win or lose)
+- Game Session: 
+Post-create (name, question, answer.. add creator to players and make him game master), 
+Get-get (to see all available ones, and the players in it), 
+Put-join (creates new player and update session players list IF session status is !in progress, 
+Put-leave (delete player and remove session player).
+Put- start (game master access.. ([players].length > 2).. new question/answer, timer starts, )
+Put
+Delete-Delete (WHEN players is empty... Maybe as a generally applied middleware)
