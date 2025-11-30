@@ -30,6 +30,28 @@ const gameSessionSchema = new mongoose.Schema({
         enum: ['pending', 'active', 'ended'],
         default: 'pending'
     },
+    messages: [
+        {
+            senderID: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                required: true,
+            },
+            content: {
+                type: String,
+                maxlength: 1000,
+                required: true,
+            },
+            timestamp: {
+                type: Date,
+                default: Date.now,
+            },
+        }
+    ],
+    winnerID: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('gameSession', gameSessionSchema);

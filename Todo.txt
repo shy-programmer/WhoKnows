@@ -27,10 +27,11 @@ Post-Login
 
 put-attempt (reduce trial and check if they win or lose)
 - Game Session: 
-Post-create (name, question, answer.. add creator to players and make him game master), 
+Post-create (name.. add creator to players and make him game master), 
 Get-get (to see all available ones, and the players in it), 
 Put-join (creates new player and update session players list IF session status is !in progress, 
 Put-leave (delete player and remove session player).
-Put- start (game master access.. ([players].length > 2).. new question/answer, timer starts, )
+Put-question(game master access, creates question and answer)
+Put- start (game master access.. ([players].length > 2).. question/answer present, timer starts, )
 Put
 Delete-Delete (WHEN players is empty... Maybe as a generally applied middleware)
