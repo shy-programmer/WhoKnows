@@ -15,7 +15,7 @@ and changed after a game session
 userID (populate: name), attempts(def = 3), trial, score (def = 0)
 - Game session: 
 name, [playersID], game masterID, time (def= 60), question (only game master),
-answer (only game master), status (pending, in progress, ended (WHEN- player gets answer i.e. trial = answer Or time 
+answer (only game master), status (pending, active, ended (WHEN- player gets answer i.e. trial = answer Or time 
 60sec exp... THEN another player is game master)) 
 
 
