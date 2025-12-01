@@ -29,6 +29,7 @@ put-attempt (reduce trial and check if they win or lose)
 - Game Session: 
 Post-create (name.. add creator to players and make him game master), 
 Get-get (to see all available ones, and the players in it), 
+Get-get (to see one game session)
 Put-join (creates new player and update session players list IF session status is !in progress, 
 Put-leave (delete player and remove session player).
 Put-question(game master access, creates question and answer)
