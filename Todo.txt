@@ -1,10 +1,8 @@
 // Tasks
 - sections (Users, Players, Game session)
-- Users should have roles default as player, 
-but the role of "game master" is given when you start a game, 
-and changed after a game session
 - Understand when a game session is created, ends, deleted, etc.
 - Rate limit( 3 valid attempts each, players can't join when in session)
+- give timeline for soft delete to become hard delete if account not retrieved
 - Players can see number of peoplee connected and their scores
 - Game session should be like a chat interface
 - JOI for all inputs

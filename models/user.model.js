@@ -6,12 +6,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    nickname: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    email: {
+    username: {
         type: String,
         required: true,
         unique: true
@@ -19,6 +14,10 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
