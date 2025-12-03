@@ -6,6 +6,7 @@
 - Players can see number of peoplee connected and their scores
 - Game session should be like a chat interface
 - JOI for all inputs
+- paginate the gets
 
 // Fields
 - Users: name, nickname

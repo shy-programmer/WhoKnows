@@ -15,3 +15,5 @@ router.put('/:sessionId/attempt', gameSessionController.attemptQuestionInSession
 router.delete('/:sessionId', gameSessionController.deleteGameSession);
 
 module.exports = router;
+
+// Validate

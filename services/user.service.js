@@ -133,7 +133,7 @@ const hardDeleteUser = async (userId, auth) => {
     }
 }
 
-modules.exports = {
+module.exports = {
     signUpUser,
     loginUser,
     getUserProfile,
