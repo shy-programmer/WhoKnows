@@ -143,14 +143,23 @@ const leaveGameSession = async (sessionId, auth) => {
     });
     player.inGame = false;
     await player.save();
+    const activePlayers = await playerModel.find({
+        sessionId: sessionId,
+        inGame: true
+    });
+    
 
-    if (session.players.length === 0) {
+    if (activePlayers.length === 0) {
         await game_sessionModel.findByIdAndDelete(sessionId);
         return {
             code: 200,
             message: 'User left the game session and session deleted as no players remain',
         }
     }
+    if (session.gameMasterID.toString() === auth.id) {
+        session.gameMasterID = activePlayers[0]._id;
+    }
+    
     return {
         code: 200,
         message: 'User left the game session successfully',
