@@ -6,6 +6,15 @@ const playerSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
+    sessionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'game_session',
+        required: true
+    },
+    inGame: {
+        type: Boolean,
+        default: true
+    },
     score: {
         type: Number,
         default: 0

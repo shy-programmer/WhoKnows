@@ -6,6 +6,7 @@ const gameSessionSchema = new mongoose.Schema({
         required: true,
     },
     players: [mongoose.Schema.Types.ObjectId],
+    admins: [mongoose.Schema.Types.ObjectId],
     gameMasterID: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
