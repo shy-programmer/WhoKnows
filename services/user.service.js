@@ -5,7 +5,6 @@ const signUpUser = async (userData) => {
     const newUser = await userModel.create(userData);
     const data = {
             id: newUser._id,
-            name: newUser.name,
             username: newUser.username
         };
     const token = jwtTool.encode(data);
@@ -35,7 +34,6 @@ const loginUser = async (userData) => {
     }
     const data = {
         id: user._id,
-        name: user.name,
         username: user.username
     };
     const token = jwtTool.encode(data);
@@ -57,7 +55,6 @@ const getUserProfile = async (userId) => {
     }
     const data = {
         id: user._id,
-        name: user.name,
         username: user.username
     };
     return {
@@ -83,7 +80,6 @@ const updateUserProfile = async (userId, updateData, auth) => {
     }
     const data = {
         id: user._id,
-        name: user.name,
         username: user.username
     };
     return {
