@@ -169,7 +169,7 @@ const leaveGameSession = async (sessionId, auth) => {
             message: 'User left the game session and session deleted as no players remain',
         }
     }
-    if (session.gameMasterID.toString() === auth.id) {
+    else if (session.gameMasterID.toString() === auth.id) {
         session.gameMasterID = activePlayers[0].userId;
         await session.save();
     }
@@ -242,6 +242,11 @@ const startGameSession = async (sessionId, auth) => {
         }
     }
     session.status = 'active';
+    for (const player of activePlayers) {
+        player.attemptsLeft = 3;
+        await player.save();
+    }
+    session.winnerID = null; 
     await session.save();
     return {
         code: 200,
@@ -297,6 +302,7 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     }
     if (attemptData.answer === session.answer) {
         session.winnerID = auth.id;
+        player.score += 10;
         session.status = 'ended';
         await session.save();
         return {
