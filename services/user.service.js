@@ -18,7 +18,7 @@ const signUpUser = async (userData) => {
 
 const loginUser = async (userData) => {
     const {username, password} = userData;
-    const user = await userModel.findOne({username, isDeleted: false});
+    const user = await userModel.findOne({username});
     if  (!user) {
         return {
             code: 404,
@@ -89,27 +89,7 @@ const updateUserProfile = async (userId, updateData, auth) => {
     }
 }
 
-const softDeleteUser = async (userId, auth) => {
-    if (userId != auth.id) {
-        return {
-            code: 403,
-            message: 'Unauthorized to update this profile'
-        }
-    }
-    const user = await userModel.findByIdAndUpdate(userId, {isDeleted: true}, {new: true});
-    if (!user) {
-        return {
-            code: 404,
-            message: 'User not found'
-        }
-    }
-    return {
-        code: 200,
-        message: 'User deleted successfully'
-    }
-}
-
-const hardDeleteUser = async (userId, auth) => {
+const DeleteUser = async (userId, auth) => {
     if (userId != auth.id) {
         return {
             code: 403,
@@ -134,8 +114,7 @@ module.exports = {
     loginUser,
     getUserProfile,
     updateUserProfile,
-    softDeleteUser,
-    hardDeleteUser
+    DeleteUser
 }
 
 

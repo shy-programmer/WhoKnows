@@ -9,8 +9,7 @@ router.post('/login', userController.loginUser);
 router.get('/profile/:userId', userController.getProfile);
 router.use(userMiddleware.Authenticate);
 router.put('/profile/:userId', userController.updateProfile);
-router.delete('/profile/:userId/recycle', userController.softDeleteUser);
-router.delete('/profile/:userId', userController.hardDeleteUser);
+router.delete('/profile/:userId', userController.DeleteUser);
 
 module.exports = router;
 

@@ -67,27 +67,11 @@ const updateProfile = async (req, res) => {
     }
 };
 
-const softDeleteUser = async (req, res) => {
+const DeleteUser = async (req, res) => {
     try {
         const userId = req.params.userId;
         const auth = req.user
-        const response = await userService.softDeleteUser(userId, auth);
-        res.status(response.code).json({
-            message: response.message
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            message: 'Internal server error'
-        });
-    }
-};
-
-const hardDeleteUser = async (req, res) => {
-    try {
-        const userId = req.params.userId;
-        const auth = req.user
-        const response = await userService.hardDeleteUser(userId, auth);
+        const response = await userService.DeleteUser(userId, auth);
         res.status(response.code).json({
             message: response.message
         });
@@ -104,6 +88,5 @@ module.exports = {
     loginUser,
     getProfile,
     updateProfile,
-    softDeleteUser,
-    hardDeleteUser
+    DeleteUser
 }
