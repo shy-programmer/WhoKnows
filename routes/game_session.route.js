@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.use(Authenticate);
 router.post('/', gameSessionController.createGameSession);
-router.get('/', gameSessionController.getAllGameSessions);
+router.get('/', gameSessionController.getAllPublicGameSessions);
 router.get('/:sessionId', gameSessionController.getGameSessionById);
 router.put('/:sessionId', gameSessionController.updateGameSession);
 router.put('/:sessionId/join', gameSessionController.joinGameSession);

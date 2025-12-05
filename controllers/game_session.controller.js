@@ -1,4 +1,5 @@
 const gameSessionService = require('../services/game_session.service'); 
+const gameSessionModel = require('../models/game_session.model');
 
 const createGameSession = async (req, res) => {
     try {
@@ -11,9 +12,9 @@ const createGameSession = async (req, res) => {
     }
 };
 
-const getAllGameSessions = async (req, res) => {
+const getAllPublicGameSessions = async (req, res) => {
     try {
-        const response = await gameSessionService.getAllGameSessions();
+        const response = await gameSessionService.getAllPublicGameSessions();
         res.status(response.code).json(response);
     } catch (error) {
         res.status(500).json({ message: 'Internal server error' });
@@ -44,9 +45,13 @@ const updateGameSession = async (req, res) => {
 
 const joinGameSession = async (req, res) => {
     try {
-        const sessionId = req.params.sessionId;
+        const sessionCode = req.body.id;
+        const session = await gameSessionModel.findOne({ id: sessionCode});
+        if (!session) {
+            res.status(404).json({ message: 'Game session not found' });
+        }
         const auth = req.user;
-        const response = await gameSessionService.joinGameSession(sessionId, auth);
+        const response = await gameSessionService.joinGameSession(session._id, auth);
         res.status(response.code).json(response);
     } catch (error) {
         res.status(500).json({ message: 'Internal server error' });
@@ -103,7 +108,7 @@ const attemptQuestionInSession = async (req, res) => {
 
 module.exports = {
     createGameSession,
-    getAllGameSessions,
+    getAllPublicGameSessions,
     getGameSessionById,
     updateGameSession,
     joinGameSession,

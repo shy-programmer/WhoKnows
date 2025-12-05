@@ -5,7 +5,7 @@ const createGameSession = async (session_data, auth) => {
     const newPlayer = await playerModel.create({
         userId: auth.id
     });
-    const newSession = game_sessionModel.create({
+    const newSession = await game_sessionModel.create({
         ...session_data,
         gameMasterID: auth.id,
         players: [newPlayer._id],
@@ -22,8 +22,8 @@ const createGameSession = async (session_data, auth) => {
     }
 }
 
-const getAllGameSessions = async () => {
-    const sessions = await game_sessionModel.find();
+const getAllPublicGameSessions = async () => {
+    const sessions = await game_sessionModel.find({ type: 'public' });
     return {
         code: 200,
         message: 'Game sessions retrieved successfully',
@@ -60,7 +60,16 @@ const updateGameSession = async (sessionId, updateData, auth) => {
             message: 'Only admins can update the game session',
         }
     }
-    const updatedSession = await game_sessionModel.findByIdAndUpdate(sessionId, updateData, {new: true});
+    const allowedFields = ['name', 'type', 'duration'];
+    const filteredData = {};
+
+    for (let key of allowedFields) {
+        if (updateData[key] !== undefined) {
+            filteredData[key] = updateData[key];
+        }
+    }
+
+    const updatedSession = await game_sessionModel.findByIdAndUpdate(sessionId, filteredData, { new: true });
     return {
         code: 200,
         message: 'Game session updated successfully',
@@ -90,13 +99,17 @@ const joinGameSession = async (sessionId, auth) => {
         sessionId: sessionId
     });
 
-    if (existingPlayer && session.players.includes(existingPlayer._id) && existingPlayer.inGame) {
+    const playerExistsInSession = existingPlayer 
+        ? session.players.map(id => id.toString()).includes(existingPlayer._id.toString())
+        : false;
+
+    if (existingPlayer && playerExistsInSession && existingPlayer.inGame) {
         return {
             code: 400,
             message: 'User already in the game session',
         }
     }
-    else if (existingPlayer && session.players.includes(existingPlayer._id) && !existingPlayer.inGame) {
+    else if (existingPlayer && playerExistsInSession && !existingPlayer.inGame) {
         existingPlayer.inGame = true;
         await existingPlayer.save();
         return {
@@ -130,17 +143,17 @@ const leaveGameSession = async (sessionId, auth) => {
             message: 'Game session not found',
         }
     }
-    const playerIndex = session.players.indexOf(auth.id);
-    if (playerIndex === -1) {
+  
+    const player = await playerModel.findOne({
+        userId: auth.id,
+        sessionId: sessionId
+    });
+    if (!player || !player.inGame) {
         return {
             code: 400,
             message: 'User not in the game session',
         }
     }
-    const player = await playerModel.findOne({
-        userId: auth.id,
-        sessionId: sessionId
-    });
     player.inGame = false;
     await player.save();
     const activePlayers = await playerModel.find({
@@ -157,7 +170,8 @@ const leaveGameSession = async (sessionId, auth) => {
         }
     }
     if (session.gameMasterID.toString() === auth.id) {
-        session.gameMasterID = activePlayers[0]._id;
+        session.gameMasterID = activePlayers[0].userId;
+        await session.save();
     }
     
     return {
@@ -205,10 +219,14 @@ const startGameSession = async (sessionId, auth) => {
             message: 'Only the game master can start the game session',
         }
     }
-    if (!session.players || session.players.length < 2) {
+    const activePlayers = await playerModel.find({
+        sessionId: sessionId,
+        inGame: true
+    });
+    if (activePlayers.length < 2) {
         return {
             code: 400,
-            message: 'At least two players are required to start the game session',
+            message: 'At least two active players are required to start the game session',
         }
     }
     if (!session.question || !session.answer) {
@@ -250,12 +268,15 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
         userId: auth.id,
         sessionId: sessionId
     });
-    if (!session.players.includes(player._id) || !player.inGame) {
-        return {
-            code: 403,
-            message: 'User not part of the game session',
-        }
-    }
+
+    if (!player) {
+    return { code: 403, message: 'User not part of the game session' };
+}
+    const isPlayerInSession = session.players.map(id => id.toString()).includes(player._id.toString());
+
+    if (!isPlayerInSession || !player.inGame) {
+    return { code: 403, message: 'User not part of the game session' };
+}
     if (player.attemptsLeft <= 0) {
         return {
             code: 400,
@@ -296,7 +317,7 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
 
 module.exports = {
     createGameSession,
-    getAllGameSessions,
+    getAllPublicGameSessions,
     getGameSessionById,
     updateGameSession,
     joinGameSession,
