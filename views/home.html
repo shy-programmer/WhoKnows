@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="homeViews/style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="select-game-container">
+        <div class="header-section">
+            <h2><span class="span1">Who</span><span class="span2">Knows</span><span class="span1">?</span><span class="span2">!</span></h2>
+            <h3>Welcome, <span id="username-display"></span>!</h3>
+        </div>
+        <div class="button-grp">
+            <h3>What would you like to do?</h3>
+            <div class="create-game">
+            <button id="create-game-btn" class="create-game-btn active">Create Game</button>
+            <div id="create-game-options" class="create-game-options">
+                <button class="public-option-btn">Public game</button>
+                <button class="private-option-btn">Private game</button>
+            </div>
+            </div>
+            <button id="join-game-btn" class="join-game-btn">Join Game</button>
+            <div id="join-game-form" class="join-game-form">
+                <input type="text" id="sessionId-input" placeholder="Enter Game Code" required>
+                <button id="submit-join-game-btn" class="submit-join-game-btn">Join</button>
+                <button id="cancel-join-game-btn" class="cancel-join-game-btn">Cancel</button>
+            </div>
+        </div>
+        
+</body>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script type="module" src="homeViews/script.js"></script>
+<script src="authGuard.js"></script>
+</html>

@@ -10,6 +10,7 @@ const signUpUser = async (req, res) => {
       token: response.token,
     });
   } catch (error) {
+    console.error("Error in signUpUser controller:", error);
     res.status(500).json({
       message: "Internal server error",
     });

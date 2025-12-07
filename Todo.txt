@@ -9,10 +9,12 @@ x sections (Users, Players, Game session)
 - JOI for all inputs
 - paginate the gets
 - local storage token
+- forgot password
 - websocket
 - UI
 - Database
 - Public and Private Game_sessions...
+- format all pages
 
 // Fields
 - Users: name, nickname
