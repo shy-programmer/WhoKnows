@@ -2,18 +2,20 @@ const game_sessionModel = require('../models/game_session.model');
 const playerModel = require('../models/player.model');
 
 const createGameSession = async (session_data, auth) => {
-    const newPlayer = await playerModel.create({
-        userId: auth.id
-    });
+   
     const newSession = await game_sessionModel.create({
         ...session_data,
         gameMasterID: auth.id,
-        players: [newPlayer._id],
+        players: [],
         admins: [auth.id]
     });
+     const newPlayer = await playerModel.create({
+        userId: auth.id,
+        sessionId: newSession._id,
+    });
 
-    newPlayer.sessionId = newSession._id;
-    await newPlayer.save();
+    newSession.players.push(newPlayer._id);
+    await newSession.save();
 
     return {
         code: 201,

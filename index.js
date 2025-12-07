@@ -29,16 +29,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+
   socket.on('chatMessage', (msg) => {
         console.log('Message received:', msg);
 
         // Broadcast message to all connected clients
         io.emit('chatMessage', msg);
     });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
 });
 
 server.listen(PORT, () => {

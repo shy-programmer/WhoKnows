@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="homeViews/style.css">
+    <link rel="stylesheet" href="homeViews/homeView.style.css">
     <title>Document</title>
 </head>
 
@@ -19,8 +19,8 @@
             <div class="create-game">
             <button id="create-game-btn" class="create-game-btn active">Create Game</button>
             <div id="create-game-options" class="create-game-options">
-                <button class="public-option-btn">Public game</button>
-                <button class="private-option-btn">Private game</button>
+                <button id="public-option-btn" class="public-option-btn">Public game</button>
+                <button id="private-option-btn" class="private-option-btn">Private game</button>
             </div>
             </div>
             <button id="join-game-btn" class="join-game-btn">Join Game</button>
@@ -33,6 +33,6 @@
         
 </body>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script type="module" src="homeViews/script.js"></script>
+<script type="module" src="homeViews/homeView.script.js"></script>
 <script src="authGuard.js"></script>
 </html>

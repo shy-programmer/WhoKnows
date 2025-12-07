@@ -9,11 +9,11 @@ router.post('/', gameSessionController.createGameSession);
 router.get('/', gameSessionController.getAllPublicGameSessions);
 router.get('/:sessionId', gameSessionController.getGameSessionById);
 router.put('/:sessionId', gameSessionController.updateGameSession);
-router.put('/:sessionId/join', gameSessionController.joinGameSession);
-router.put('/:sessionId/leave', gameSessionController.leaveGameSession);
-router.put('/:sessionId/question', gameSessionController.addQuestionToSession);
-router.put('/:sessionId/start', gameSessionController.startGameSession);
-router.put('/:sessionId/attempt', gameSessionController.attemptQuestionInSession);
+router.post('/:sessionId/join', gameSessionController.joinGameSession);
+router.post('/:sessionId/leave', gameSessionController.leaveGameSession);
+router.post('/:sessionId/question', gameSessionController.addQuestionToSession);
+router.post('/:sessionId/start', gameSessionController.startGameSession);
+router.post('/:sessionId/attempt', gameSessionController.attemptQuestionInSession);
 
 module.exports = router;
 

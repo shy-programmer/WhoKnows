@@ -6,6 +6,7 @@ const createGameSession = async (req, res) => {
         const session_data = req.body;
         const auth = req.user;
         const response = await gameSessionService.createGameSession(session_data, auth);
+        console.log('Response sent:', response);
         res.status(response.code).json(response);
     } catch (error) {
         res.status(500).json({ message: 'Internal server error' });

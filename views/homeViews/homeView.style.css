@@ -20,7 +20,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #9add43 0%, #35a0df 100%);
+            background: linear-gradient(135deg, #06c015 0%, #35a0df 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -48,12 +48,12 @@
         .span1 {
             font-size: 28px;
             font-weight: 700;
-            color: red;
+            color: #06c015;
         }
 
         .span2 {
-            font-size: 16px;
-            color: green;
+            font-size: 20px;
+            color: red;
         }
 
         .button-grp {
@@ -85,12 +85,12 @@
         }
 
         .create-game-btn {
-            background-color: #9add43;
+            background-color: #06c015;
             color: white;
         }
 
         .create-game-btn:hover {
-            background-color: #b7ec70;
+            background-color: #06c015;
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
         }
@@ -120,7 +120,7 @@
 
         .public-option-btn:hover,
         .private-option-btn:hover {
-            background-color: #b7ec70;
+            background-color: #06c015;
             color: white;
         }
 
@@ -131,7 +131,7 @@
 
         .join-game-btn:hover {
             background-color: #7ec1e7;
-            #9add43 0%, #35a0df
+            #06c015 0%, #35a0df
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(118, 75, 162, 0.4);
         }
@@ -157,7 +157,7 @@
 
         #sessionId-input:focus {
             outline: none;
-            border-color: #9add43;
+            border-color: #06c015;
             box-shadow: 0 0 8px rgba(118, 75, 162, 0.3);
         }
 
@@ -173,21 +173,21 @@
         }
 
         .submit-join-game-btn {
-            background-color: #9add43;
+            background-color: #06c015;
             color: white;
         }
 
         .submit-join-game-btn:hover {
-            background-color: #b7ec70;
+            background-color: #06c015;
         }
 
         .cancel-join-game-btn {
             background-color: #e0e0e0;
-            color: rgb(236, 56, 56);
+            color: #333;
         }
 
         .cancel-join-game-btn:hover {
-            background-color: #d0d0d0;
+            background-color: red;
         }
 
     .create-game:hover .create-game-btn {
