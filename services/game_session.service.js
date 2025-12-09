@@ -20,7 +20,10 @@ const createGameSession = async (session_data, auth) => {
     return {
         code: 201,
         message: 'Game session created successfully',
-        data: newSession
+        data: {
+            session: newSession,
+            player: newPlayer
+        }
     }
 }
 
@@ -132,7 +135,10 @@ const joinGameSession = async (sessionId, auth) => {
     return {
         code: 200,
         message: 'User joined the game session successfully',
-        data: session
+        data: {
+            session: session,
+            player: newPlayer
+        }
     }
 }
 
@@ -166,6 +172,7 @@ const leaveGameSession = async (sessionId, auth) => {
 
     if (activePlayers.length === 0) {
         await game_sessionModel.findByIdAndDelete(sessionId);
+        await playerModel.deleteMany({ sessionId: sessionId });
         return {
             code: 200,
             message: 'User left the game session and session deleted as no players remain',

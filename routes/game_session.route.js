@@ -9,7 +9,7 @@ router.post('/', gameSessionController.createGameSession);
 router.get('/', gameSessionController.getAllPublicGameSessions);
 router.get('/:sessionId', gameSessionController.getGameSessionById);
 router.put('/:sessionId', gameSessionController.updateGameSession);
-router.post('/:sessionId/join', gameSessionController.joinGameSession);
+router.post('/:sessionCode/join', gameSessionController.joinGameSession);
 router.post('/:sessionId/leave', gameSessionController.leaveGameSession);
 router.post('/:sessionId/question', gameSessionController.addQuestionToSession);
 router.post('/:sessionId/start', gameSessionController.startGameSession);

@@ -38,8 +38,8 @@ signupForm.addEventListener('submit', async (e) => {
         const result = await response.json();
 
         if (response.ok) {
-    localStorage.setItem('token', result.token);
-    localStorage.setItem('user', JSON.stringify(result.data));
+    sessionStorage.setItem('token', result.token);
+    sessionStorage.setItem('user', JSON.stringify(result.data));
     signupForm.reset();
     window.location.href = "/home.html";
 
@@ -70,8 +70,8 @@ loginForm.addEventListener('submit', async (e) => {
 
         if (response.ok) {
             // store token for authentication
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('user', JSON.stringify(result.data));
+            sessionStorage.setItem('token', result.token);
+            sessionStorage.setItem('user', JSON.stringify(result.data));
             loginForm.reset();
             window.location.href = "/home.html";
         } else {

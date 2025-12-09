@@ -7,10 +7,30 @@
     <title>Document</title>
 </head>
 <body>
+  <div id="room-header">
+    <h1 id="room-title">Game Session code: <span id="game-session-id"></span></h1>
+    <button id="leave-room-btn">Leave Room</button>
+    
+  </div>
+  <div id="game-session-items">
+  <div id="game-info">
+    <h2 id="session-title">Game Session</h2>
+    <div id="players-list">
+      <h3>Players:</h3>
+      <ul id="players"></ul>
+    </div>
+    <div id="scoreboard-section">
+      <h3>Scoreboard:</h3>
+      <ul id="scoreboard"></ul>
+    </div>
+  </div>
+  <div id="game-chat">
    <ul id="messages"></ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form> 
+  </div>
+  </div>
 </body>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script type="module" src="roomViews/roomView.script.js"></script>

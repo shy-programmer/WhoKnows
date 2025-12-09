@@ -12,8 +12,13 @@ const gameSessionSchema = new mongoose.Schema(
       unique: true,
       default: () => crypto.randomBytes(3).toString("hex").toUpperCase(),
     },
-    players: [mongoose.Schema.Types.ObjectId],
-    admins: [mongoose.Schema.Types.ObjectId],
+    players: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "player"
+    }],
+    admins: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"}],
     gameMasterID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -69,4 +74,4 @@ const gameSessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("gameSession", gameSessionSchema);
+module.exports = mongoose.model("game_session", gameSessionSchema);
