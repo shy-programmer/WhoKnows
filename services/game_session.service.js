@@ -118,11 +118,14 @@ const joinGameSession = async (sessionId, auth) => {
         existingPlayer.inGame = true;
         await existingPlayer.save();
         return {
-            code: 200,
-            message: 'User re-joined the game session successfully',
-            data: session
+        code: 200,
+        message: 'User re-joined the game session successfully',
+        data: {
+            session: session,
+            player: existingPlayer
         }
     }
+            }
 
     const newPlayer = await playerModel.create({
         userId: auth.id,
@@ -204,6 +207,12 @@ const addQuestionToSession = async (sessionId, questionData, auth) => {
             message: 'Only the game master can add questions',
         }
     }
+    if (session.status === 'active') {
+        return {
+            code: 400,
+            message: 'Cannot add questions to an active game session',
+        }
+    };
     session.question = questionData.question; //validators
     session.answer = questionData.answer; //validators
     await session.save();
@@ -312,7 +321,7 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     if (attemptData.answer === session.answer) {
         session.winnerID = auth.id;
         player.score += 10;
-        session.status = 'ended';
+        session.status = 'pending';
         await session.save();
         return {
             code: 200,

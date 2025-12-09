@@ -82,6 +82,57 @@ body {
   border-radius: 5px;
 }
 
+.question-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 200px;
+}
+.question-form h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.question-form input,
+.question-form textarea,
+.question-form select {
+  padding: 12px 15px;
+  border: 1px solid #bdc3c7;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+}
+
+.question-form input:focus,
+.question-form textarea:focus,
+.question-form select:focus {
+  outline: none;
+  border-color: #3498db;
+  background-color: #f0f8ff;
+}
+
+.question-form button {
+  padding: 12px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.question-form button:hover {
+  background-color: #2980b9;
+}
+
 /* Chat panel */
 #game-chat {
   flex: 1;

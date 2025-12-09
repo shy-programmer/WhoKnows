@@ -40,7 +40,7 @@ const gameSessionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "active", "ended"],
+      enum: ["pending", "active"],
       default: "pending",
     },
     messages: [

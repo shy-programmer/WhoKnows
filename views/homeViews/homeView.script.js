@@ -9,7 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/index.html';
     }
 });
-        
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+    sessionStorage.clear();
+    window.location.href = '/index.html';
+});
 
 document.getElementById('join-game-btn').addEventListener('click', () => {
     document.getElementById('join-game-form').style.display = 'block';
@@ -48,11 +52,16 @@ document.getElementById('submit-join-game-btn').addEventListener('click', async 
                 },
             });
             const result = await response.json();
+            console.log('Join game response:', result);
             if (response.ok) {
                 sessionStorage.setItem('GameSession', JSON.stringify({
                     id: result.data.session.id,
-                    mongoId: result.data.session._id
+                    mongoId: result.data.session._id,
+                    type: result.data.session.type,
+                    gameMasterID: result.data.session.gameMasterID,
+                    status: result.data.session.status
                 }));
+                socket.emit('update-player-info', sessionStorage.getItem('GameSession'));
                 window.location.href = `/game.html`;
             }
             else {
@@ -70,7 +79,16 @@ document.getElementById('cancel-join-game-btn').addEventListener('click', () => 
     document.getElementById('join-game-form').style.display = 'none';
 });
 
-
+socket.on('public-games-updated', (gamesList) => {
+    console.log('public games list:', gamesList);
+    const publicGamesUl = document.getElementById('public-games-ul');
+    publicGamesUl.innerHTML = ''; 
+    gamesList.forEach(game => {
+        const li = document.createElement('li');
+        li.textContent = `Game ID: ${game.id} | Status: ${game.status}`;
+        publicGamesUl.appendChild(li);
+    });
+});
 
 
 const gameType = async (type) => {
@@ -94,12 +112,17 @@ const gameType = async (type) => {
             sessionStorage.setItem('GameSession', JSON.stringify({
                 id: result.data.session.id,
                 mongoId: result.data.session._id,
+                type: result.data.session.type,
+                gameMasterID: result.data.session.gameMasterID,
+                status: result.data.session.status
             }));
             if (type === 'public') {
                 socket.emit('update-public-games');
             }
-
+            
             window.location.href = `/game.html`;
+            socket.emit('update-player-info', sessionStorage.getItem('GameSession'));
+
         } else {
             alert(result.message || `Error creating ${type} game session`);
         }   
@@ -109,13 +132,7 @@ const gameType = async (type) => {
     }
 };
 
-socket.on('public-games-updated', (gamesList) => {
-    console.log('public games list:', gamesList);
-    const publicGamesUl = document.getElementById('public-games-ul');
-    publicGamesUl.innerHTML = ''; 
-    gamesList.forEach(game => {
-        const li = document.createElement('li');
-        li.textContent = `Game ID: ${game.id} | Status: ${game.status}`;
-        publicGamesUl.appendChild(li);
-    });
+socket.on('connect', () => {
+    console.log('Connected to server with ID:', socket.id);
+    socket.emit('update-public-games');
 });
