@@ -318,7 +318,7 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
             message: 'Game session has already ended',
         }
     }
-    if (attemptData.answer === session.answer) {
+    if (attemptData.answer.toLowerCase() === session.answer.toLowerCase()) {
         session.winnerID = auth.id;
         player.score += 10;
         session.status = 'pending';
