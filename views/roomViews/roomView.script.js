@@ -178,7 +178,7 @@ if (questionForm) {
             questionForm.style.display = "none";
 
             //alert("Game has started!");
-            socket.emit('chat message', `QUESTION: response.question}`
+            socket.emit('chat message', `QUESTION: ${response.question}`}
             socket.emit('updateNow', session);
 
         } catch (err) {
