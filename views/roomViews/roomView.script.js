@@ -177,7 +177,8 @@ if (questionForm) {
             // Hide question form now that game has started
             questionForm.style.display = "none";
 
-            alert("Game has started!");
+            //alert("Game has started!");
+            socket.emit('chat message', `QUESTION: response.question}`
             socket.emit('updateNow', session);
 
         } catch (err) {
