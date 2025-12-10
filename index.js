@@ -63,19 +63,21 @@ async function updateSession(sessionMongoId, sessionCode) {
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
+    socket.on('updateNow', async (session) => {
+        await updateSession(session.mongoId, session.id);
+    });
+    
     socket.on('join-game', async (session) => {
         socket.join(session.id);
         console.log(`Socket ${socket.id} joined ${session.id}`);
-        await updateSession(session.mongoId, session.id);
     });
 
     socket.on('leave-game', async (session) => {
         socket.leave(session.id);
         console.log(`Socket ${socket.id} left ${session.id}`);
-        await updateSession(session.mongoId, session.id);
     });
 
-    socket.on('chat message', ({ gameSession, message }) => {
+    socket.on('chat message', async ({ gameSession, message }) => {
         io.to(gameSession.id).emit('chat message', message);
     });
 

@@ -34,6 +34,7 @@ leaveBtn.addEventListener('click', async () => {
     });
 
     socket.emit('leave-game', session);
+    socket.emit('updateNow', session);
 
     sessionStorage.removeItem('GameSession');
     window.location.href = '/home.html';
@@ -43,12 +44,14 @@ form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = input.value.trim();
 
-    if (msg) {
+    if (!msg) return;
+
         socket.emit('chat message', {
             gameSession: session,
             message: msg
         });
-        if (JSON.parse(sessionStorage.getItem('GameSession')).status === 'active') {
+
+        if (msg && session.status === 'active') {
             
                 try {
                     const token = sessionStorage.getItem('token');
@@ -62,8 +65,16 @@ form.addEventListener('submit', async (e) => {
                     });
                     const result = await response.json();
                     if (response.ok) {
+                        socket.emit('updateNow', session);
+                        socket.emit('chat message', {
+                            gameSession: session,
+                            message: `Attempt result: ${result.message}`
+                        });
+                        
                         console.log('Attempt result:', result);
                         alert(result.message);
+                        
+                        
                     } else {
                         alert(result.message || 'Error submitting attempt');
                     }
@@ -72,9 +83,9 @@ form.addEventListener('submit', async (e) => {
                     alert('Something went wrong: ' + err.message);
                 }
          
-        };
-        input.value = '';
-    }
+        }
+        
+        
 });
 
 socket.on('chat message', (msg) => {
@@ -82,6 +93,7 @@ socket.on('chat message', (msg) => {
     li.textContent = msg;
     messages.appendChild(li);
     messages.scrollTop = messages.scrollHeight;
+    input.value = '';
 });
 
 
@@ -166,17 +178,20 @@ if (questionForm) {
             questionForm.style.display = "none";
 
             alert("Game has started!");
+            socket.emit('updateNow', session);
 
         } catch (err) {
             console.error(err);
             alert("Something went wrong: " + err.message);
         }
+        
     });
 }
 
 
 
 socket.on('connect', () => {
+    socket.emit('updateNow', session);
     socket.emit('join-game', session);
     socket.emit('update-public-games');
 });

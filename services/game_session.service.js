@@ -297,7 +297,7 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
 }
     const isPlayerInSession = session.players.map(id => id.toString()).includes(player._id.toString());
 
-    if (!isPlayerInSession || !player.inGame) {
+    if (!isPlayerInSession) {
     return { code: 403, message: 'User not part of the game session' };
 }
     if (player.attemptsLeft <= 0) {
@@ -323,6 +323,17 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
         player.score += 10;
         session.status = 'pending';
         await session.save();
+        await player.save();
+        const otherPlayers = await playerModel.find({
+            sessionId: sessionId,
+            inGame: true,
+            userId: { $ne: session.gameMasterID }
+        });
+        if (otherPlayers.length > 0) {
+            session.gameMasterID = otherPlayers[0].userId;
+            await session.save();
+        }
+        
         return {
             code: 200,
             message: 'Correct answer! You have won the game session.',
@@ -332,6 +343,29 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     
     player.attemptsLeft -= 1;
     await player.save();
+    const finishedAttempts = await playerModel.find({
+        sessionId: sessionId,
+        inGame: true,
+        attemptsLeft: { $gt: 0 }
+    });
+    if (finishedAttempts.length === 0) {
+        session.status = 'pending';
+        await session.save();
+        const otherPlayers = await playerModel.find({
+            sessionId: sessionId,
+            inGame: true,
+            userId: { $ne: session.gameMasterID }
+        });
+        if (otherPlayers.length > 0) {
+            session.gameMasterID = otherPlayers[0].userId;
+            await session.save();
+        }
+        return {
+            code: 200,
+            message: 'No attempts left for any player. Game session ended.',
+            data: session
+        }
+    }
     return {
         code: 200,
         message: 'Incorrect answer. Try again!',
