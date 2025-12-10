@@ -180,7 +180,8 @@ if (questionForm) {
             //alert("Game has started!");
             socket.emit('chat message', {
                 gameSession: session,
-                message: `QUESTION: ${response.question}`)
+                message: `QUESTION: ${question}`
+                })
             socket.emit('updateNow', session);
 
         } catch (err) {
