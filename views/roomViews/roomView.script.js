@@ -239,14 +239,17 @@ if (questionForm) {
 
             // Hide question form now that game has started
             questionForm.style.display = "none";
+        socket.emit('startTimer', session);
 
-            alert("Game has started!");
+            //alert("Game has started!");
+            socket.emit('chat message', {
+                gameSession: session,
+                message: `QUESTION: ${question}`
+                })
             socket.emit('updateNow', {
     mongoId: session.mongoId,
     id: session.id
 });
-            socket.emit('startTimer', session);
-
 
         } catch (err) {
             console.error(err);
