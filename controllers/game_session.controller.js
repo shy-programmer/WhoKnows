@@ -105,6 +105,16 @@ const attemptQuestionInSession = async (req, res) => {
     }   
 };
 
+const endGameSession = async (req, res) => {
+    try {
+        const sessionId = req.params.sessionId;
+        const response = await gameSessionService.endGameSession(sessionId);
+        return res.status(response.code).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal server error' });
+    } 
+}
+
 
 
 module.exports = {
@@ -116,5 +126,6 @@ module.exports = {
     leaveGameSession,
     addQuestionToSession,
     startGameSession,
-    attemptQuestionInSession
+    attemptQuestionInSession,
+    endGameSession
 };

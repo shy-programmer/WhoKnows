@@ -28,7 +28,7 @@ const gameSessionSchema = new mongoose.Schema(
       type: Number, // duration in seconds
       required: true,
       min: 0,
-      default: 60, // default to 1 minute
+      default: 20, // default to 1 minute
     },
     question: {
       type: String,
@@ -40,7 +40,7 @@ const gameSessionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "active"],
+      enum: ["pending", "active", "ended"],
       default: "pending",
     },
     messages: [

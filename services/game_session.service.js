@@ -1,5 +1,6 @@
 const game_sessionModel = require('../models/game_session.model');
 const playerModel = require('../models/player.model');
+const {changeGameMaster} = require('../utils/gameMasterRotation')
 
 const createGameSession = async (session_data, auth) => {
    
@@ -182,8 +183,7 @@ const leaveGameSession = async (sessionId, auth) => {
         }
     }
     else if (session.gameMasterID.toString() === auth.id) {
-        session.gameMasterID = activePlayers[0].userId;
-        await session.save();
+        changeGameMaster(session)
     }
     
     return {
@@ -321,18 +321,9 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     if (attemptData.answer.toLowerCase() === session.answer.toLowerCase()) {
         session.winnerID = auth.id;
         player.score += 10;
-        session.status = 'pending';
+        session.status = 'ended';
         await session.save();
         await player.save();
-        const otherPlayers = await playerModel.find({
-            sessionId: sessionId,
-            inGame: true,
-            userId: { $ne: session.gameMasterID }
-        });
-        if (otherPlayers.length > 0) {
-            session.gameMasterID = otherPlayers[0].userId;
-            await session.save();
-        }
         
         return {
             code: 200,
@@ -349,17 +340,9 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
         attemptsLeft: { $gt: 0 }
     });
     if (finishedAttempts.length === 0) {
-        session.status = 'pending';
+        session.status = 'ended';
         await session.save();
-        const otherPlayers = await playerModel.find({
-            sessionId: sessionId,
-            inGame: true,
-            userId: { $ne: session.gameMasterID }
-        });
-        if (otherPlayers.length > 0) {
-            session.gameMasterID = otherPlayers[0].userId;
-            await session.save();
-        }
+
         return {
             code: 200,
             message: 'No attempts left for any player. Game session ended.',
@@ -373,6 +356,38 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     }
 }
 
+const endGameSession = async (sessionId) => {
+    const session = await game_sessionModel.findById(sessionId);
+    if (!session) {
+        return {
+            code: 404,
+            message: 'Game session not found',
+        }
+    }
+
+    session.status = "pending";
+    session.winnerID = null;
+
+    const activePlayers = await playerModel.find({
+        sessionId,
+        inGame: true,
+        userId: { $ne: session.gameMasterID }
+    });
+
+    
+    if (activePlayers.length > 0) {
+        changeGameMaster(session)
+    }
+
+    await session.save();
+
+    return {
+        code: 200,
+        message: 'Game session ended successfully',
+        data: session
+    };
+}
+
 module.exports = {
     createGameSession,
     getAllPublicGameSessions,
@@ -382,5 +397,6 @@ module.exports = {
     leaveGameSession,
     addQuestionToSession,
     startGameSession,
-    attemptQuestionInSession
+    attemptQuestionInSession,
+    endGameSession
 };

@@ -14,6 +14,7 @@ router.post('/:sessionId/leave', gameSessionController.leaveGameSession);
 router.post('/:sessionId/question', gameSessionController.addQuestionToSession);
 router.post('/:sessionId/start', gameSessionController.startGameSession);
 router.post('/:sessionId/attempt', gameSessionController.attemptQuestionInSession);
+router.post('/:sessionId/end', gameSessionController.endGameSession)
 
 module.exports = router;
 
