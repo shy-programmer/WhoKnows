@@ -1,11 +1,11 @@
 const userController = require('../controllers/user.controller');
-// const {updateValidator, signupValidator} = require('../validators/user.validator');
+const {ValidateNewUser, ValidateLogin} = require('../validators/user.validator');
 const userMiddleware = require('../middlewares/user.middleware');
 const express = require('express');
 const router = express.Router();
 
-router.post('/signup', userMiddleware.ValidateNewUser, userController.signUpUser);
-router.post('/login', userController.loginUser);
+router.post('/signup', ValidateNewUser, userController.signUpUser);
+router.post('/login', ValidateLogin, userController.loginUser);
 router.get('/profile/:userId', userController.getProfile);
 router.use(userMiddleware.Authenticate);
 router.put('/profile/:userId', userController.updateProfile);

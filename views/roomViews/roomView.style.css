@@ -151,6 +151,9 @@ body {
   overflow-y: auto;
   padding: 15px;
   background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #messages > div {
@@ -158,8 +161,68 @@ body {
   margin-bottom: 10px;
   background-color: #e8f4fd;
   border-radius: 8px;
+  align-self: flex-start;
   border-left: 4px solid #35a0df;
   word-wrap: break-word;
+}
+
+#messages > .sender {
+  border-left: 4px solid #06c015;
+  align-self: flex-end;
+  background-color: #d4edda;
+  border-left-color: #06c015;
+}
+
+.msg-background {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-message {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #eecb41;
+  border-left-color: #eecb41;
+  border-right: 4px solid #eecb41;
+  border-radius: 8px;
+  word-wrap: break-word;
+  width: 80%;
+  display: flex;
+  align-self: center;
+  gap: 10px;
+  color: #4a5568;
+  align-self: center;
+  text-align: center;
+}
+
+#messages > .alert-message {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-left: 4px solid #eecb41;
+  border-left-color: #eecb41;
+  border-right: 4px solid #eecb41;
+  border-radius: 8px;
+  word-wrap: break-word;
+  width: 80%;
+  display: flex;
+  align-self: center;
+  gap: 10px;
+  color: #4a5568;
+  align-self: center;
+  text-align: center;
+}
+
+
+
+
+.alert-message p {
+  margin: 0;
+  color: #92400e;
+  font-weight: 500;
+  background: #edf2f7;
+  color: #4a5568;
+  align-self: center;
+  text-align: center;
+  max-width: 100%;
+  border-left: 4px solid #667eea;
 }
 
 .username {

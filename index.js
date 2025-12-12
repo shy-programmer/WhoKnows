@@ -12,9 +12,11 @@ connect();
 const PORT = process.env.PORT || 3000;
 const gameSessionModel = require('./models/game_session.model');
 const playerModel = require('./models/player.model');
+const {attemptQuestionInSession} = require('./services/game_session.service')
 
 const userRoutes = require('./routes/user.route');
 const gameSessionRoutes = require('./routes/game_session.route');
+const userModel = require('./models/user.model');
 
 const server = createServer(app);
 const io = new Server(server);
@@ -63,7 +65,7 @@ async function updateSession(sessionMongoId, sessionCode) {
         players
     });
 
-    console.log(`Emitted session-updated for game ${sessionCode}`);
+    console.log(`game ${sessionCode} updated`);
 }
 
 const activeTimers = {};
@@ -84,23 +86,19 @@ const  startTimer = async (session) => {
         const checkSession = await gameSessionModel.findOne({_id : sessionId})
         io.to(roomId).emit("timer-update", { remaining: timeLeft });
 
-        if (checkSession.status !== 'active') {
+        if (checkSession.status !== 'active' || timeLeft <= 0) {
             clearInterval(activeTimers[sessionId]);
             delete activeTimers[sessionId];
-            timeLeft = ''
+            timeLeft = '0'
             io.to(roomId).emit("timer-update", { remaining: timeLeft });
+
+            io.to(roomId).emit('endGame', sessionId);
+            
+
+            
             return
         }
 
-        if (timeLeft <= 0) {
-            clearInterval(activeTimers[sessionId]);
-            delete activeTimers[sessionId];
-            timeLeft = ''
-            io.to(roomId).emit("timer-update", { remaining: timeLeft });
-            io.to(roomId).emit('endGame', sessionId);
-
-            return;
-        }
 
         timeLeft--;
     }, 1000);
@@ -120,7 +118,6 @@ io.on('connection', (socket) => {
 
     socket.on('startTimer', async (session) => {
         startTimer(session);
-   
     })
 
     
@@ -135,8 +132,51 @@ io.on('connection', (socket) => {
     });
 
     socket.on('chat message', async ({ gameSession, message, senderId }) => {
-        io.to(gameSession.id).emit('chat message', {message, senderId});
+        let sessionDoc = await gameSessionModel.findById(gameSession.mongoId);
+let userObj = null;
+let playerObj = null;
+
+if (senderId !== "alert") {
+    userObj = await userModel.findById(senderId);
+    playerObj = await playerModel.findOne({ 
+        userId: senderId,
+        sessionId: gameSession.mongoId
+     });
+}
+
+io.to(gameSession.id).emit("send chat", {
+    session: sessionDoc,
+    message,
+    user: userObj || "alert",
+    player: playerObj || null
+});
+
+        
+        
     });
+
+    socket.on("playerAttempt", async (data) => {
+        let sessionDoc = await gameSessionModel.findById(data.gameSession.mongoId);
+let userObj = null;
+let playerObj = null;
+
+if (data.senderId !== "alert") {
+    userObj = await userModel.findById(data.senderId);
+    playerObj = await playerModel.findOne({ 
+        userId: data.senderId,
+        sessionId: data.gameSession.mongoId
+     });
+}
+    io.to(data.gameSession.id).emit("send chat", {
+        session: sessionDoc,
+        message: data.message,
+        user: userObj || 'alert only',
+        player: playerObj || null,
+        alert: data.result.message,
+    });
+
+});
+
 
     socket.on('update-public-games', async () => {
         const publicGames = await gameSessionModel.find({ type: 'public' });

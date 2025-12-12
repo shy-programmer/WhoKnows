@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const encode = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  return jwt.sign(payload, process.env.JWT_SECRET); //{ expiresIn: '1h' }?
 };
 
 const decode = (token) => {

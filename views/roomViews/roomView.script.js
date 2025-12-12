@@ -1,7 +1,8 @@
 const socket = io();
 let session = null;
 let user = null;
-let countdownInterval = null;
+let alertColour = null;
+
 
 
 const form = document.getElementById('form');
@@ -15,7 +16,7 @@ const scoreList = document.getElementById('scoreboard');
 
 const endFunction = async (sessionId) => {
     try {
-        const response = await fetch(`/game-sessions/${sessionId}/end`, {
+        await fetch(`/game-sessions/${sessionId}/end`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -23,23 +24,10 @@ const endFunction = async (sessionId) => {
             },
         });
 
-        const result = await response.json();
-        console.log("🔥 END GAME RESULT:", result);
-
-        if (response.ok) {
-            socket.emit('chat message', {
-                gameSession: session,
-                message: `${result.message} \n The correct answer was: ${result.data.answer.toUpperCase()}`,
-                senderId: user.id
-            });
-        }
-
-        socket.emit('updateNow', {
+      socket.emit("updateNow", {
             mongoId: sessionId,
             id: session.id
         });
-
-
 
     } catch (err) {
         console.error("❌ Error ending game:", err);
@@ -52,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!session) {
         alert('No game session found. Join a game first.');
-        window.location.href = '/index.html';
+        window.location.href = '/game.html';
         return;
     }
 
@@ -84,12 +72,16 @@ form.addEventListener('submit', async (e) => {
     const msg = input.value.trim();
 
     if (!msg) return;
-
+        if (msg && session.status !== 'active') {
+            socket.emit('updateNow', {
+    mongoId: session.mongoId,
+    id: session.id
+});
         socket.emit('chat message', {
             gameSession: session,
             message: msg,
             senderId: user.id
-        });
+        });}
 
         if (msg && session.status === 'active') {
             
@@ -105,22 +97,41 @@ form.addEventListener('submit', async (e) => {
                     });
                     const result = await response.json();
                     if (response.ok) {
+                        
                         socket.emit('updateNow', {
-    mongoId: session.mongoId,
-    id: session.id
-});
-                        socket.emit('chat message', {
-                            gameSession: session,
-                            message: `Attempt result: ${result.message}`,
-                            senderId: user.id
+                            mongoId: session.mongoId,
+                            id: session.id
                         });
-                        
-                        console.log('Attempt result:', result);
-                        alert(result.message);
-                        
-                        
-                        
-                        
+                if (result.data.winnerID) {
+                
+                socket.emit('playerAttempt', {
+                gameSession: session,
+                message: msg,
+                senderId: user.id,
+                result
+
+            });
+        
+
+            setTimeout( () => { 
+                socket.emit('playerAttempt', {
+                gameSession: session,
+                message: `${user.username} won; \n The correct answer was: ${result.data.answer.toUpperCase()}`,
+                senderId: 'alert',
+                result
+            });
+            }, 500)
+                }
+                else
+                {
+                    socket.emit("playerAttempt", {
+                    gameSession: session,
+                    message: msg,
+                    senderId: user.id,
+                    result
+                });
+            }
+                                
                     } else {
                         socket.emit('updateNow', {
     mongoId: session.mongoId,
@@ -138,23 +149,72 @@ form.addEventListener('submit', async (e) => {
         
 });
 
-socket.on('chat message', (data) => {
+socket.on('send chat', (data) => {
     const mainDiv = document.createElement('div');
-    const div1 = document.createElement('div');
-    const div2 = document.createElement('div');
-    div1.classList.add("username");
-    div2.classList.add("user-message");
-    div1.textContent = user.username
-    div2.textContent = data.message
-    mainDiv.appendChild(div1)
-    mainDiv.appendChild(div2)
+
+    const isAlert = data.user === "alert only";
+
+    if (isAlert) {
+        const alertDiv = document.createElement('div');
+        mainDiv.classList.add("alert-message");
+        alertDiv.textContent = data.message;
+        
+        mainDiv.appendChild(alertDiv);
+    }
+    else if (data.session.status === "active" || data.session.winnerID) {
+        mainDiv.classList.add("msg-background")
+        const div1 = document.createElement('div');
+        const div2 = document.createElement('div');
+        const alertDiv = document.createElement('div');
+        alertDiv.classList.add("alert-message");
+        
+
+        div1.classList.add("username");
+        div2.classList.add("user-message");
+
+        div1.textContent = `${data.user.username} {Attempts Left: ${data.player?.attemptsLeft}}`;
+        div2.textContent = data.message;
+        alertDiv.textContent = data.alert;
+        if (data.user._id === user.id) {
+            mainDiv.classList.add("sender")
+            div1.textContent = `YOU {Attempts Left: ${data.player?.attemptsLeft}}`
+        }
+
+        mainDiv.appendChild(div1);
+        mainDiv.appendChild(div2);
+        mainDiv.appendChild(alertDiv);
+        
+    }
+    else if (data.session.status !== "active") {
+        mainDiv.classList.add("msg-background")
+        const div1 = document.createElement('div');
+        const div2 = document.createElement('div');
+
+        
+
+        div1.classList.add("username");
+        div2.classList.add("user-message");
+
+        div1.textContent = data.user.username;
+        div2.textContent = data.message;
+        if (data.user._id === user.id) {
+            mainDiv.classList.add("sender")
+            div1.textContent = 'YOU'
+        }
+
+
+        mainDiv.appendChild(div1);
+        mainDiv.appendChild(div2);
+    }
+
     messages.appendChild(mainDiv);
     messages.scrollTop = messages.scrollHeight;
-    if (data.senderId === user.id) {
+
+    if (user.id === data.user?._id) {
         input.value = '';
     }
-    
 });
+
 
 
 socket.on('session-updated', (updated) => {
@@ -190,11 +250,7 @@ socket.on('session-updated', (updated) => {
         questionForm.style.display = 'none';
     }
 
-    if (updated.status === 'ended') {
-        const chatBackground = document.getElementById("messages");
-        chatBackground.style.backgroundColor = "#F9F9F9"
-        endFunction(updated.mongoId)
-    }
+    
 });
 
 if (questionForm) {
@@ -250,10 +306,11 @@ if (questionForm) {
             
         socket.emit('startTimer', session);
 
-            //alert("Game has started!");
-            socket.emit('chat message', {
+            socket.emit('playerAttempt', {
                 gameSession: session,
-                message: `QUESTION: ${question}`
+                message: `QUESTION: ${question}`,
+                senderId: 'alert',
+                result
                 })
             socket.emit('updateNow', {
     mongoId: session.mongoId,
@@ -275,7 +332,7 @@ socket.on("timer-update", (data) => {
     if (!timerDisplay) return;
     timerDisplay.textContent = `${data.remaining}s`;
     
-});
+})
 socket.on('endGame', (sessionId) => {
     const chatBackground = document.getElementById("messages");
     chatBackground.style.backgroundColor = "#F9F9F9"

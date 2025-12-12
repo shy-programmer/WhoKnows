@@ -300,28 +300,31 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     if (!isPlayerInSession) {
     return { code: 403, message: 'User not part of the game session' };
 }
-    if (player.attemptsLeft <= 0) {
-        return {
-            code: 400,
-            message: 'No attempts left',
-        }
-    }
+    
     if (!attemptData.answer) {
         return {
             code: 400,
             message: 'Answer is required',
         }
     }
+    if (player.attemptsLeft <= 0) {
+        return {
+            code: 200,
+            message: 'No attempts left',
+            data: session
+        }
+    }
     if (session.winnerID) {
         return {
-            code: 400,
+            code: 200,
             message: 'Game session has already ended',
+            data: session
         }
     }
     if (attemptData.answer.toLowerCase() === session.answer.toLowerCase()) {
         session.winnerID = auth.id;
         player.score += 10;
-        session.status = 'ended';
+        session.status = 'pending';
         await session.save();
         await player.save();
         
@@ -340,7 +343,7 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
         attemptsLeft: { $gt: 0 }
     });
     if (finishedAttempts.length === 0) {
-        session.status = 'ended';
+        session.status = 'pending';
         await session.save();
 
         return {

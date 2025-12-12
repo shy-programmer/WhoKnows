@@ -28,7 +28,7 @@ const gameSessionSchema = new mongoose.Schema(
       type: Number, // duration in seconds
       required: true,
       min: 0,
-      default: 20, // default to 1 minute
+      default: 60, // default to 1 minute
     },
     question: {
       type: String,
@@ -43,24 +43,6 @@ const gameSessionSchema = new mongoose.Schema(
       enum: ["pending", "active", "ended"],
       default: "pending",
     },
-    messages: [
-      {
-        senderID: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        content: {
-          type: String,
-          maxlength: 1000,
-          required: true,
-        },
-        timestamp: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
     winnerID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -70,6 +52,24 @@ const gameSessionSchema = new mongoose.Schema(
       enum: ["public", "private"],
       default: "public",
     }
+        // messages: [
+    //   {
+    //     senderID: {
+    //       type: mongoose.Schema.Types.ObjectId,
+    //       ref: "User",
+    //       required: true,
+    //     },
+    //     content: {
+    //       type: String,
+    //       maxlength: 1000,
+    //       required: true,
+    //     },
+    //     timestamp: {
+    //       type: Date,
+    //       default: Date.now,
+    //     },
+    //   },
+    // ],
   },
   { timestamps: true }
 );
