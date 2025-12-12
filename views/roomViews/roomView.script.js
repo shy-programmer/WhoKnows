@@ -27,7 +27,6 @@ const endFunction = async (sessionId) => {
         console.log("🔥 END GAME RESULT:", result);
 
         if (response.ok) {
-            
             socket.emit('chat message', {
                 gameSession: session,
                 message: `${result.message} \n The correct answer was: ${result.data.answer.toUpperCase()}`,
@@ -140,9 +139,16 @@ form.addEventListener('submit', async (e) => {
 });
 
 socket.on('chat message', (data) => {
-    const li = document.createElement('li');
-    li.textContent = data.message;
-    messages.appendChild(li);
+    const mainDiv = document.createElement('div');
+    const div1 = document.createElement('div');
+    const div2 = document.createElement('div');
+    div1.classList.add("username");
+    div2.classList.add("user-message");
+    div1.textContent = user.username
+    div2.textContent = data.message
+    mainDiv.appendChild(div1)
+    mainDiv.appendChild(div2)
+    messages.appendChild(mainDiv);
     messages.scrollTop = messages.scrollHeight;
     if (data.senderId === user.id) {
         input.value = '';
@@ -185,6 +191,8 @@ socket.on('session-updated', (updated) => {
     }
 
     if (updated.status === 'ended') {
+        const chatBackground = document.getElementById("messages");
+        chatBackground.style.backgroundColor = "#F9F9F9"
         endFunction(updated.mongoId)
     }
 });
@@ -239,6 +247,7 @@ if (questionForm) {
 
             // Hide question form now that game has started
             questionForm.style.display = "none";
+            
         socket.emit('startTimer', session);
 
             //alert("Game has started!");
@@ -260,13 +269,16 @@ if (questionForm) {
 }
 
 socket.on("timer-update", (data) => {
+    const chatBackground = document.getElementById("messages");
+    chatBackground.style.backgroundColor = "#06c015"
     const timerDisplay = document.getElementById("timer-display");
-
     if (!timerDisplay) return;
-
     timerDisplay.textContent = `${data.remaining}s`;
+    
 });
 socket.on('endGame', (sessionId) => {
+    const chatBackground = document.getElementById("messages");
+    chatBackground.style.backgroundColor = "#F9F9F9"
     endFunction(sessionId)
 });
 

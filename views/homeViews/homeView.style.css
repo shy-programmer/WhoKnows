@@ -145,7 +145,6 @@
 
         .join-game-btn:hover {
             background-color: #7ec1e7;
-            #06c015 0%, #35a0df
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(118, 75, 162, 0.4);
         }
