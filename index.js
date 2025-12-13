@@ -179,7 +179,9 @@ if (data.senderId !== "alert") {
 
 
     socket.on('update-public-games', async () => {
-        const publicGames = await gameSessionModel.find({ type: 'public' });
+        const publicGames = await gameSessionModel
+            .find({ type: 'public' })
+            .sort({createdAt: -1});
 
         const gamesList = publicGames.map(s => ({
             id: s.id,
