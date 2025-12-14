@@ -12,7 +12,6 @@ connect();
 const PORT = process.env.PORT || 3000;
 const gameSessionModel = require('./models/game_session.model');
 const playerModel = require('./models/player.model');
-const {attemptQuestionInSession} = require('./services/game_session.service')
 
 const userRoutes = require('./routes/user.route');
 const gameSessionRoutes = require('./routes/game_session.route');
@@ -91,10 +90,8 @@ const  startTimer = async (session) => {
             delete activeTimers[sessionId];
             timeLeft = '0'
             io.to(roomId).emit("timer-update", { remaining: timeLeft });
-
-            io.to(roomId).emit('endGame', sessionId);
             
-
+            io.to(roomId).emit('endGame', sessionId);
             
             return
         }
