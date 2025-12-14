@@ -314,6 +314,15 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
             data: session
         }
     }
+
+if (session.gameMasterID.toString() === auth.id) {
+     return {
+            code: 400,
+            message: 'Game Masters are not involved in the game...',
+            data: session
+        }
+}
+
     if (session.winnerID) {
         return {
             code: 200,
@@ -340,7 +349,8 @@ const attemptQuestionInSession = async (sessionId, attemptData, auth) => {
     const finishedAttempts = await playerModel.find({
         sessionId: sessionId,
         inGame: true,
-        attemptsLeft: { $gt: 0 }
+        attemptsLeft: { $gt: 0 },
+        userId: { $ne: session.gameMasterID }
     });
     if (finishedAttempts.length === 0) {
         session.status = 'pending';

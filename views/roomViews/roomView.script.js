@@ -10,6 +10,10 @@ const input = document.getElementById('input');
 const messages = document.getElementById('messages');
 const leaveBtn = document.getElementById('leave-room-btn');
 const questionForm = document.getElementById('question-form');
+const guessForm = document.getElementById('guess-form');
+const gameMasterInfo = document.getElementById('gameMaster-info');
+const guess = document.getElementById('guess-attempt');
+
 
 const playersList = document.getElementById('players');
 const scoreList = document.getElementById('scoreboard');
@@ -66,25 +70,16 @@ leaveBtn.addEventListener('click', async () => {
     window.location.href = '/home.html';
 });
 
-
-form.addEventListener('submit', async (e) => {
+guessForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const msg = input.value.trim();
+    const msg = guess.value.trim();
 
-    if (!msg) return;
-        if (msg && session.status !== 'active') {
-            socket.emit('updateNow', {
-    mongoId: session.mongoId,
-    id: session.id
-});
-        socket.emit('chat message', {
-            gameSession: session,
-            message: msg,
-            senderId: user.id
-        });}
+    if (!msg) return
+    if (msg && session.status !== 'active') {
+        alert('Cannot make attempt, game is over')
+    }
 
-        if (msg && session.status === 'active') {
-            
+    if (msg && session.status === 'active') {
                 try {
                     const token = sessionStorage.getItem('token');
                     const response = await fetch(`/game-sessions/${session.mongoId}/attempt`, {
@@ -98,10 +93,6 @@ form.addEventListener('submit', async (e) => {
                     const result = await response.json();
                     if (response.ok) {
                         
-                        socket.emit('updateNow', {
-                            mongoId: session.mongoId,
-                            id: session.id
-                        });
                 if (result.data.winnerID) {
                 
                 socket.emit('playerAttempt', {
@@ -122,6 +113,24 @@ form.addEventListener('submit', async (e) => {
             });
             }, 500)
                 }
+                else if (result.data.status === 'pending') {
+                    socket.emit('playerAttempt', {
+                gameSession: session,
+                message: msg,
+                senderId: user.id,
+                result
+
+            });
+        
+            setTimeout( () => { 
+                socket.emit('playerAttempt', {
+                gameSession: session,
+                message: `Game Over! (No Winner); \n The correct answer was: ${result.data.answer.toUpperCase()}`,
+                senderId: 'alert',
+                result
+            });
+            }, 500)
+                }
                 else
                 {
                     socket.emit("playerAttempt", {
@@ -131,6 +140,11 @@ form.addEventListener('submit', async (e) => {
                     result
                 });
             }
+
+            socket.emit('updateNow', {
+                            mongoId: session.mongoId,
+                            id: session.id
+                        });
                                 
                     } else {
                         socket.emit('updateNow', {
@@ -145,6 +159,24 @@ form.addEventListener('submit', async (e) => {
                 }
          
         }
+
+})
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = input.value.trim();
+
+    if (!msg) return;
+
+            socket.emit('updateNow', {
+    mongoId: session.mongoId,
+    id: session.id
+});
+        socket.emit('chat message', {
+            gameSession: session,
+            message: msg,
+            senderId: user.id
+        });
         
         
 });
@@ -153,67 +185,68 @@ socket.on('send chat', (data) => {
     const mainDiv = document.createElement('div');
 
     const isAlert = data.user === "alert only";
+    const isSender = data.user?._id === user.id;
+
+    if (isSender) {
+        mainDiv.classList.add("sender");
+    }
 
     if (isAlert) {
-        const alertDiv = document.createElement('div');
         mainDiv.classList.add("alert-message");
-        alertDiv.textContent = data.message;
-        
-        mainDiv.appendChild(alertDiv);
+        mainDiv.textContent = data.message;
     }
-    else if (data.session.status === "active" || data.session.winnerID) {
-        mainDiv.classList.add("msg-background")
-        const div1 = document.createElement('div');
-        const div2 = document.createElement('div');
-        const alertDiv = document.createElement('div');
-        alertDiv.classList.add("alert-message");
-        
+    else if (data.session.status === "active" || data.type === 'attempt') {
+        mainDiv.classList.add("msg-background");
 
-        div1.classList.add("username");
-        div2.classList.add("user-message");
+        const nameDiv = document.createElement("div");
+        const msgDiv = document.createElement("div");
 
-        div1.textContent = `${data.user.username} {Attempts Left: ${data.player?.attemptsLeft}}`;
-        div2.textContent = data.message;
-        alertDiv.textContent = data.alert;
-        if (data.user._id === user.id) {
-            mainDiv.classList.add("sender")
-            div1.textContent = `YOU {Attempts Left: ${data.player?.attemptsLeft}}`
+        nameDiv.classList.add("username");
+        msgDiv.classList.add("user-message");
+
+        if (data.session.gameMasterID === data.user._id) {
+            nameDiv.textContent = isSender
+                ? "YOU {Game Master}"
+                : `${data.user.username} {Game Master}`;
+        } else {
+            nameDiv.textContent = isSender
+                ? `YOU {Attempts Left: ${data.player?.attemptsLeft}}`
+                : `${data.user.username} {Attempts Left: ${data.player?.attemptsLeft}}`;
         }
 
-        mainDiv.appendChild(div1);
-        mainDiv.appendChild(div2);
-        mainDiv.appendChild(alertDiv);
-        
-    }
-    else if (data.session.status !== "active") {
-        mainDiv.classList.add("msg-background")
-        const div1 = document.createElement('div');
-        const div2 = document.createElement('div');
+        msgDiv.textContent = data.message;
 
-        
+        mainDiv.append(nameDiv, msgDiv);
 
-        div1.classList.add("username");
-        div2.classList.add("user-message");
-
-        div1.textContent = data.user.username;
-        div2.textContent = data.message;
-        if (data.user._id === user.id) {
-            mainDiv.classList.add("sender")
-            div1.textContent = 'YOU'
+        if (data.alert) {
+            const alertDiv = document.createElement("div");
+            alertDiv.classList.add("alert-message");
+            alertDiv.textContent = data.alert;
+            mainDiv.appendChild(alertDiv);
         }
+    }
+    else {
+        mainDiv.classList.add("msg-background");
 
+        const nameDiv = document.createElement("div");
+        const msgDiv = document.createElement("div");
 
-        mainDiv.appendChild(div1);
-        mainDiv.appendChild(div2);
+        nameDiv.classList.add("username");
+        msgDiv.classList.add("user-message");
+
+        nameDiv.textContent = isSender ? "YOU" : data.user.username;
+        msgDiv.textContent = data.message;
+
+        mainDiv.append(nameDiv, msgDiv);
     }
 
     messages.appendChild(mainDiv);
     messages.scrollTop = messages.scrollHeight;
 
-    if (user.id === data.user?._id) {
-        input.value = '';
-    }
+    if (isSender && data.type === 'chat') input.value = "";
+    if (isSender && data.type === 'attempt') guess.value = "";
 });
+
 
 
 
@@ -245,9 +278,26 @@ socket.on('session-updated', (updated) => {
     if (user.id === updated.gameMasterID && updated.status === 'pending') {
         document.getElementById('question-input').value = "";
         document.getElementById('answer-input').value = "";
-        questionForm.style.display = 'block';
-    } else {
+        questionForm.style.display = 'flex';
+    } 
+    
+    else {
         questionForm.style.display = 'none';
+    }
+
+    if (updated.status === 'active') {
+        if (user.id === updated.gameMasterID) {
+            guessForm.style.display = 'none';
+            gameMasterInfo.style.display = 'block';
+        } else {
+            console.log("NOT GAME MASTER")
+            gameMasterInfo.style.display = 'none'
+            guessForm.style.display = 'flex';
+        }
+
+    } else {
+        guessForm.style.display = 'none'
+        gameMasterInfo.style.display = 'none'
     }
 
     

@@ -14,21 +14,15 @@
   </div>
   <div id="game-session-items">
   <div id="game-info">
-    <h2 id="session-title">Game Session</h2>
     <form id="question-form" class="question-form" style="display: none;">
       <h3>Gamemaster, Submit a Question</h3>
       <input type="text" id="question-input" placeholder="Enter your question" required />
       <input type="text" id="answer-input" placeholder="Enter the answer" required />
       <button type="submit">Submit</button>
     </form>
-    <div id="timer-display" style="font-size: 24px; font-weight: bold; margin-top: 10px;">
-  Timer: <span id="timer-value"></span>s
+    <div id="timer-display" >
+  <span id="timer-value"></span>
 </div>
-    <!-- <div id="question-display" style="margin-top: 20px;">
-      <h3>Current Question:</h3>
-      <p id="current-question">Waiting for the gamemaster to submit a question...</p>
-      </div> -->
-
     <div id="players-list">
       <h3>Players:</h3>
       <ul id="players"></ul>
@@ -41,6 +35,14 @@
   </div>
   <div id="game-chat">
    <div id="messages"></div>
+   <div id="guess" class="guess">
+    <h2 id="gameMaster-info" class="gameMaster-info">Game Masters are not involved in the game...</h2>
+    <form id="guess-form" class="guess-form" action="">
+      <h3></h3>
+      <input id="guess-attempt" class="guess-attempt" autocomplete="off" />
+      <button>Submit attempt</button>
+    </form>
+   </div>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form> 

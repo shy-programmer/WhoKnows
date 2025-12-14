@@ -136,19 +136,18 @@ io.on('connection', (socket) => {
 let userObj = null;
 let playerObj = null;
 
-if (senderId !== "alert") {
     userObj = await userModel.findById(senderId);
     playerObj = await playerModel.findOne({ 
         userId: senderId,
         sessionId: gameSession.mongoId
      });
-}
 
 io.to(gameSession.id).emit("send chat", {
     session: sessionDoc,
     message,
-    user: userObj || "alert",
-    player: playerObj || null
+    user: userObj,
+    player: playerObj,
+    type: 'chat'
 });
 
         
@@ -173,6 +172,7 @@ if (data.senderId !== "alert") {
         user: userObj || 'alert only',
         player: playerObj || null,
         alert: data.result.message,
+        type: 'attempt'
     });
 
 });
