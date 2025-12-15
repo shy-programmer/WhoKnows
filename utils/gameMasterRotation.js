@@ -7,7 +7,7 @@ const activePlayers = await playerModel
     .find({ sessionId, inGame: true })
     .sort({ createdAt: 1 }); 
 
-if (activePlayers.length > 1) {
+if (activePlayers.length >= 1) {
     const currentIndex = activePlayers.findIndex(
         p => p.userId.toString() === session.gameMasterID.toString()
     );

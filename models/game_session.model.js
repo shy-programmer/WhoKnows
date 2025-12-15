@@ -51,12 +51,7 @@ const gameSessionSchema = new mongoose.Schema(
       type: String,
       enum: ["public", "private"],
       default: "public",
-    },
-    expiresAt: {
-      type: Date,
-      default: () => new Date(Date.now() + 60 * 60 * 1000), 
-      index: { expires: 0 } 
-    },
+    }
         // messages: [
     //   {
     //     senderID: {

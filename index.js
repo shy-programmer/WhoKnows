@@ -8,6 +8,9 @@ const cors = require('cors');
 
 const { connect } = require('./config/database');
 connect();
+const disconnectTimers = new Map();
+const socketUsers = new Map();
+
 
 const PORT = process.env.PORT || 3000;
 const gameSessionModel = require('./models/game_session.model');
@@ -16,6 +19,8 @@ const playerModel = require('./models/player.model');
 const userRoutes = require('./routes/user.route');
 const gameSessionRoutes = require('./routes/game_session.route');
 const userModel = require('./models/user.model');
+
+const {leaveGameSession} = require('./services/game_session.service')
 
 const server = createServer(app);
 const io = new Server(server);
@@ -37,10 +42,15 @@ app.get('/', (req, res) => {
 });
 
 
-async function updateSession(sessionMongoId, sessionCode) {
+async function updateSession(sessionMongoId, sessionCode, userId) {
     const sessionDoc = await gameSessionModel.findById(sessionMongoId);
 
     if (!sessionDoc) return;
+
+    const currentPlayer = await playerModel.findOne({
+        userId,
+        sessionId: sessionMongoId
+    });
 
     const playerDocs = await playerModel
       .find({ sessionId: sessionMongoId })
@@ -48,10 +58,12 @@ async function updateSession(sessionMongoId, sessionCode) {
 
     const players = playerDocs.map(p => ({
         playerId: p._id.toString(),
+        userId: p.userId,
         username: p.userId.username,
         score: p.score,
         inGame: p.inGame,
     }));
+    
 
     io.to(sessionCode).emit('session-updated', {
         id: sessionDoc.id,
@@ -61,6 +73,7 @@ async function updateSession(sessionMongoId, sessionCode) {
         duration: sessionDoc.duration,
         question: sessionDoc.question,
         answer: sessionDoc.answer,
+        currentPlayer,
         players
     });
 
@@ -83,9 +96,12 @@ const  startTimer = async (session) => {
 
     activeTimers[sessionId] = setInterval(async () => {
         const checkSession = await gameSessionModel.findOne({_id : sessionId})
-        io.to(roomId).emit("timer-update", { remaining: timeLeft });
+        io.to(roomId).emit("timer-update", { 
+            remaining: timeLeft,
+            question: checkSession.question
+         });
 
-        if (checkSession.status !== 'active' || timeLeft <= 0) {
+        if (checkSession.status !== 'active') {
             clearInterval(activeTimers[sessionId]);
             delete activeTimers[sessionId];
             timeLeft = '0'
@@ -96,6 +112,19 @@ const  startTimer = async (session) => {
             return
         }
 
+        if (timeLeft <= 0) {
+            clearInterval(activeTimers[sessionId]);
+            delete activeTimers[sessionId];
+            timeLeft = ''
+            io.to(roomId).emit("timer-update", { remaining: timeLeft });
+            io.to(checkSession.id).emit("send chat", {
+                message: `TIME UP! \n The correct answer was: ${checkSession.answer.toUpperCase()}`,
+                user: 'alert only'
+            });
+            io.to(roomId).emit('endGame', sessionId);
+            
+            return
+        }
 
         timeLeft--;
     }, 1000);
@@ -106,12 +135,23 @@ const  startTimer = async (session) => {
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    socket.on('updateNow', async ({ mongoId }) => {
+    socket.on('updateNow', async ({ mongoId, id, userId }) => {
     const updated = await gameSessionModel.findById(mongoId);
     if (updated) {
-        await updateSession(updated._id.toString(), updated.id);
+        await updateSession(updated._id.toString(), updated.id, userId);
     }
-});
+    
+    });
+
+    socket.on('register-user', ({ userId, sessionId }) => {
+        socketUsers.set(socket.id, { userId, sessionId });
+
+        if (disconnectTimers.has(userId)) {
+            clearTimeout(disconnectTimers.get(userId));
+            disconnectTimers.delete(userId);
+            console.log(`Reconnect: cancelled removal for ${userId}`);
+        }
+    });
 
     socket.on('startTimer', async (session) => {
         startTimer(session);
@@ -151,7 +191,7 @@ io.to(gameSession.id).emit("send chat", {
         
     });
 
-    socket.on("playerAttempt", async (data) => {
+    socket.on("playerAttempt", async (data, ack) => {
         let sessionDoc = await gameSessionModel.findById(data.gameSession.mongoId);
 let userObj = null;
 let playerObj = null;
@@ -172,6 +212,10 @@ if (data.senderId !== "alert") {
         type: 'attempt'
     });
 
+    if (ack) {
+        ack()
+    }
+
 });
 
 
@@ -190,8 +234,38 @@ if (data.senderId !== "alert") {
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-    });
+    const info = socketUsers.get(socket.id);
+    if (!info) return;
+
+    const { userId, sessionId } = info;
+    socketUsers.delete(socket.id);
+
+    console.log(`Socket disconnected for user ${userId}`);
+
+    const timeout = setTimeout(async () => {
+        console.log(`User ${userId} did not return — removing from game`);
+
+        
+        await leaveGameSession(sessionId, { id : userId })
+
+
+        const sessionDoc = await gameSessionModel.findById(sessionId);
+        if (sessionDoc) {
+            await updateSession(
+                sessionDoc._id.toString(),
+                sessionDoc.id,
+                userId
+            );
+
+        }
+
+        disconnectTimers.delete(userId);
+
+    }, 10_000); 
+
+    disconnectTimers.set(userId, timeout);
+});
+
 });
 
 server.listen(PORT, () => {

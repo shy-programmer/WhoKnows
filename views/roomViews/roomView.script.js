@@ -15,7 +15,6 @@ const gameMasterInfo = document.getElementById('gameMaster-info');
 const guess = document.getElementById('guess-attempt');
 
 
-const playersList = document.getElementById('players');
 const scoreList = document.getElementById('scoreboard');
 
 const endFunction = async (sessionId) => {
@@ -30,7 +29,8 @@ const endFunction = async (sessionId) => {
 
       socket.emit("updateNow", {
             mongoId: sessionId,
-            id: session.id
+            id: session.id,
+            userId: user.id
         });
 
     } catch (err) {
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!session) {
         alert('No game session found. Join a game first.');
-        window.location.href = '/game.html';
+        window.location.href = '/home.html';
         return;
     }
 
@@ -63,7 +63,8 @@ leaveBtn.addEventListener('click', async () => {
     socket.emit('leave-game', session);
     socket.emit('updateNow', {
     mongoId: session.mongoId,
-    id: session.id
+    id: session.id,
+    userId: user.id
 });
 
     sessionStorage.removeItem('GameSession');
@@ -93,43 +94,37 @@ guessForm.addEventListener('submit', async (e) => {
                     const result = await response.json();
                     if (response.ok) {
                         
-                if (result.data.winnerID) {
-                
+                if (result.data.winnerID) { 
                 socket.emit('playerAttempt', {
-                gameSession: session,
-                message: msg,
-                senderId: user.id,
-                result
+                    gameSession: session,
+                    message: msg,
+                    senderId: user.id,
+                    result
+                }, () => {
+                    socket.emit('playerAttempt', {
+                        gameSession: session,
+                        message: `${user.username} WON!\nThe correct answer was: ${result.data.answer.toUpperCase()}`,
+                        senderId: 'alert',
+                        result
+                    });
+                });
 
-            });
-        
-
-            setTimeout( () => { 
-                socket.emit('playerAttempt', {
-                gameSession: session,
-                message: `${user.username} won; \n The correct answer was: ${result.data.answer.toUpperCase()}`,
-                senderId: 'alert',
-                result
-            });
-            }, 500)
                 }
                 else if (result.data.status === 'pending') {
-                    socket.emit('playerAttempt', {
+                socket.emit('playerAttempt', {
                 gameSession: session,
                 message: msg,
                 senderId: user.id,
                 result
-
-            });
-        
-            setTimeout( () => { 
+            }, () => {
                 socket.emit('playerAttempt', {
                 gameSession: session,
-                message: `Game Over! (No Winner); \n The correct answer was: ${result.data.answer.toUpperCase()}`,
+                message: `GAME OVER! (No Winner); \n The correct answer was: ${result.data.answer.toUpperCase()}`,
                 senderId: 'alert',
                 result
             });
-            }, 500)
+            });       
+                
                 }
                 else
                 {
@@ -143,13 +138,15 @@ guessForm.addEventListener('submit', async (e) => {
 
             socket.emit('updateNow', {
                             mongoId: session.mongoId,
-                            id: session.id
+                            id: session.id,
+                            userId: user.id
                         });
                                 
                     } else {
                         socket.emit('updateNow', {
     mongoId: session.mongoId,
-    id: session.id
+    id: session.id,
+    userId: user.id
 });
                         alert(result.message || 'Error submitting attempt');
                     }
@@ -170,7 +167,8 @@ form.addEventListener('submit', async (e) => {
 
             socket.emit('updateNow', {
     mongoId: session.mongoId,
-    id: session.id
+    id: session.id,
+    userId: user.id
 });
         socket.emit('chat message', {
             gameSession: session,
@@ -195,7 +193,7 @@ socket.on('send chat', (data) => {
         mainDiv.classList.add("alert-message");
         mainDiv.textContent = data.message;
     }
-    else if (data.session.status === "active" || data.type === 'attempt') {
+    else if (data.type === 'attempt') {
         mainDiv.classList.add("msg-background");
 
         const nameDiv = document.createElement("div");
@@ -256,22 +254,14 @@ socket.on('session-updated', (updated) => {
     sessionStorage.setItem('GameSession', JSON.stringify(updated));
     session = updated;
 
-    
-
-
-    playersList.innerHTML = '';
-    updated.players.forEach(p => {
-        const li = document.createElement('li');
-        li.textContent = p.username;
-        if (!p.inGame) li.style.color = 'red';
-        playersList.appendChild(li);
-    });
-
     scoreList.innerHTML = '';
     updated.players.forEach(p => {
         const li = document.createElement('li');
         li.innerHTML = `<span class="player-name">${p.username}:</span> <span class="player-score">${p.score}</span>`;
-        if (!p.inGame) li.style.color = 'red';
+        if (p.userId === session.gameMasterID) {
+            console.log('OGA')
+            li.style.color = 'green'}
+        else if (!p.inGame) li.style.color = 'red';
         scoreList.appendChild(li);
     });
 
@@ -290,7 +280,6 @@ socket.on('session-updated', (updated) => {
             guessForm.style.display = 'none';
             gameMasterInfo.style.display = 'block';
         } else {
-            console.log("NOT GAME MASTER")
             gameMasterInfo.style.display = 'none'
             guessForm.style.display = 'flex';
         }
@@ -299,6 +288,14 @@ socket.on('session-updated', (updated) => {
         guessForm.style.display = 'none'
         gameMasterInfo.style.display = 'none'
     }
+
+    if (
+    updated.currentPlayer &&
+    updated.currentPlayer.userId === user.id &&
+    updated.currentPlayer.inGame === false
+) {
+    window.location.href = '/home.html';
+}
 
     
 });
@@ -364,7 +361,8 @@ if (questionForm) {
                 })
             socket.emit('updateNow', {
     mongoId: session.mongoId,
-    id: session.id
+    id: session.id,
+    userId: user.id
 });
 
         } catch (err) {
@@ -378,28 +376,37 @@ if (questionForm) {
 socket.on("timer-update", (data) => {
     const chatBackground = document.getElementById("messages");
     chatBackground.style.backgroundColor = "#06c015"
+    const sessionDetails = document.getElementById("in-session");
     const timerDisplay = document.getElementById("timer-display");
-    if (!timerDisplay) return;
-    timerDisplay.textContent = `${data.remaining}s`;
+    const questionAsked = document.getElementById("session-question");
+    if (!sessionDetails) return;
+    sessionDetails.style.display = 'block'
+    timerDisplay.textContent = `${data.remaining}`;
+    questionAsked.textContent = `${data.question}`
     
 })
 socket.on('endGame', (sessionId) => {
     const chatBackground = document.getElementById("messages");
     chatBackground.style.backgroundColor = "#F9F9F9"
+    const sessionDetails = document.getElementById("in-session");
+    sessionDetails.style.display = 'none'
     endFunction(sessionId)
 });
-
-
 
 
 
 socket.on('connect', () => {
     socket.emit('updateNow', {
     mongoId: session.mongoId,
-    id: session.id
+    id: session.id,
+    userId: user.id
 });
     socket.emit('join-game', session);
     socket.emit('update-public-games');
+    socket.emit('register-user', {
+        userId: user.id,
+        sessionId: session.mongoId
+    });
 });
 
 

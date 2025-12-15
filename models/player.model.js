@@ -22,12 +22,7 @@ const playerSchema = new mongoose.Schema({
     attemptsLeft: {
         type: Number,
         default: 3
-    },
-    expiresAt: {
-      type: Date,
-      default: () => new Date(Date.now() + 60 * 60 * 1000), 
-      index: { expires: 0 } // TTL
-    },
+    }
 }, { timestamps: true }
 );
 
