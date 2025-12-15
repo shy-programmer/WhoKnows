@@ -377,11 +377,10 @@ if (questionForm) {
 socket.on("timer-update", (data) => {
     const chatBackground = document.getElementById("messages");
     chatBackground.style.backgroundColor = "#06c015"
-    const sessionDetails = document.getElementById("in-session");
     const timerDisplay = document.getElementById("timer-display");
     const questionAsked = document.getElementById("session-question");
-    if (!sessionDetails) return;
-    sessionDetails.style.display = 'block'
+    timerDisplay.style.display = 'block'
+    questionAsked.style.display = 'block'
     timerDisplay.textContent = `${data.remaining}`;
     questionAsked.textContent = `${data.question}`
     
@@ -389,8 +388,11 @@ socket.on("timer-update", (data) => {
 socket.on('endGame', (sessionId) => {
     const chatBackground = document.getElementById("messages");
     chatBackground.style.backgroundColor = "#F9F9F9"
-    const sessionDetails = document.getElementById("in-session");
-    sessionDetails.style.display = 'none'
+    const timerDisplay = document.getElementById("timer-display");
+    const questionAsked = document.getElementById("session-question");
+    timerDisplay.style.display = 'none'
+    questionAsked.style.display = 'none'
+    
     endFunction(sessionId)
 });
 
