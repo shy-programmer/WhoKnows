@@ -259,8 +259,9 @@ socket.on('session-updated', (updated) => {
         const li = document.createElement('li');
         li.innerHTML = `<span class="player-name">${p.username}:</span> <span class="player-score">${p.score}</span>`;
         if (p.userId === session.gameMasterID) {
-            console.log('OGA')
-            li.style.color = 'green'}
+            li.style.color = 'green'
+            li.style.fontWeight = "bold";
+        }
         else if (!p.inGame) li.style.color = 'red';
         scoreList.appendChild(li);
     });

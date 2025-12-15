@@ -58,7 +58,7 @@ async function updateSession(sessionMongoId, sessionCode, userId) {
 
     const players = playerDocs.map(p => ({
         playerId: p._id.toString(),
-        userId: p.userId,
+        userId: p.userId._id,
         username: p.userId.username,
         score: p.score,
         inGame: p.inGame,
