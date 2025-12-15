@@ -79,7 +79,7 @@ body {
   border-radius: 8px;
   padding: 10px;
   flex: 0 0 auto;
-  max-width: 40%;
+  max-width: 60%;
 }
 
 #timer-display, #session-question {

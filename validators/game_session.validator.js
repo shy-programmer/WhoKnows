@@ -3,20 +3,17 @@ const gameSessionModel = require('../models/game_session.model');
 const playerModel = require('../models/player.model');
 
 
-// ----------------------------------------------------
-// 1. Validate Create Game Session
-// ----------------------------------------------------
+
 const ValidateCreateSession = async (req, res, next) => {
     const schema = joi.object({
+        name: joi.string().alphanum(),
         type: joi.string().valid('public', 'private').required(),
-        duration: joi.number().integer().min(10).max(300).required(), // 10–300 sec
-        maxPlayers: joi.number().integer().min(2).max(20).required()
+        duration: joi.number().integer().min(10).max(300), 
     });
 
     try {
         await schema.validateAsync(req.body);
 
-        // Additional check: no duplicate session code
         const existing = await gameSessionModel.findOne({ id: req.body.id });
         if (existing) {
             return res.status(400).json({ message: "Game session code already exists" });
@@ -32,9 +29,6 @@ const ValidateCreateSession = async (req, res, next) => {
 };
 
 
-// ----------------------------------------------------
-// 2. Validate Question Submission
-// ----------------------------------------------------
 const ValidateQuestion = async (req, res, next) => {
     const schema = joi.object({
         question: joi.string().min(3).max(200).required(),
@@ -63,9 +57,6 @@ const ValidateQuestion = async (req, res, next) => {
 };
 
 
-// ----------------------------------------------------
-// 3. Validate Start Game Session
-// ----------------------------------------------------
 const ValidateStartSession = async (req, res, next) => {
     try {
         const session = await gameSessionModel.findById(req.params.sessionId);
@@ -90,9 +81,6 @@ const ValidateStartSession = async (req, res, next) => {
 };
 
 
-// ----------------------------------------------------
-// 4. Validate Attempt Answer
-// ----------------------------------------------------
 const ValidateAttempt = async (req, res, next) => {
     const schema = joi.object({
         answer: joi.string().min(1).max(100).required()
@@ -133,9 +121,6 @@ const ValidateAttempt = async (req, res, next) => {
 };
 
 
-// ----------------------------------------------------
-// 5. Validate End Game Session
-// ----------------------------------------------------
 const ValidateEndSession = async (req, res, next) => {
     try {
         const session = await gameSessionModel.findById(req.params.sessionId);
