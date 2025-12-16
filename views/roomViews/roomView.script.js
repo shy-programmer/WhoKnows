@@ -19,13 +19,17 @@ const scoreList = document.getElementById('scoreboard');
 
 const endFunction = async (sessionId) => {
     try {
-        await fetch(`/game-sessions/${sessionId}/end`, {
+        const response = await fetch(`/game-sessions/${sessionId}/end`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
             },
         });
+
+        const result = await response.json()
+
+        console.log("HERE:", result)
 
       socket.emit("updateNow", {
             mongoId: sessionId,
@@ -267,8 +271,6 @@ socket.on('session-updated', (updated) => {
     });
 
     if (user.id === updated.gameMasterID && updated.status === 'pending') {
-        document.getElementById('question-input').value = "";
-        document.getElementById('answer-input').value = "";
         questionForm.style.display = 'flex';
     } 
     
@@ -331,6 +333,7 @@ if (questionForm) {
                 return;
             }
 
+
             console.log("Question added:", questionResult);
 
             const response = await fetch(`/game-sessions/${session.mongoId}/start`, {
@@ -349,8 +352,9 @@ if (questionForm) {
 
             console.log("Game started:", result);
 
-            // Hide question form now that game has started
             questionForm.style.display = "none";
+            document.getElementById('question-input').value = "";
+            document.getElementById('answer-input').value = "";
             
         socket.emit('startTimer', session);
 

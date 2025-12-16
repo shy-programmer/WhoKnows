@@ -261,7 +261,7 @@ if (data.senderId !== "alert") {
 
         disconnectTimers.delete(userId);
 
-    }, 10_000); 
+    }, 30_000); 
 
     disconnectTimers.set(userId, timeout);
 });

@@ -183,7 +183,7 @@ const leaveGameSession = async (sessionId, auth) => {
         }
     }
     else if (session.gameMasterID.toString() === auth.id) {
-        changeGameMaster(session)
+        await changeGameMaster(session)
     }
     
     return {
@@ -389,7 +389,7 @@ const endGameSession = async (sessionId) => {
 
     
     if (activePlayers.length > 0) {
-        changeGameMaster(session)
+        await changeGameMaster(session)
     }
 
     await session.save();

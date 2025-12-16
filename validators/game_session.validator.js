@@ -107,9 +107,6 @@ const ValidateAttempt = async (req, res, next) => {
             return res.status(403).json({ message: "User not part of this game session" });
         }
 
-        if (player.attemptsLeft <= 0) {
-            return res.status(400).json({ message: "No attempts left" });
-        }
 
         next();
     }
@@ -127,14 +124,6 @@ const ValidateEndSession = async (req, res, next) => {
 
         if (!session) {
             return res.status(404).json({ message: "Game session not found" });
-        }
-
-        if (session.status === "pending") {
-            return res.status(400).json({ message: "Game has not started" });
-        }
-
-        if (session.status === "ended") {
-            return res.status(400).json({ message: "Game session already ended" });
         }
 
         next();
