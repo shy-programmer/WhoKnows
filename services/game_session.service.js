@@ -244,7 +244,7 @@ const startGameSession = async (sessionId, auth) => {
     if (activePlayers.length < 3) {
         return { 
             code: 400,
-            message: 'At least two active players are required to start the game session',
+            message: 'At least three active players are required to start the game session',
         }
     }
     if (!session.question || !session.answer) {
