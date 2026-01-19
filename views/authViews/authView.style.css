@@ -2,13 +2,13 @@ body { font-family: Arial, sans-serif; display: flex; justify-content: center; a
     .header {
         text-align: center;
         margin-bottom: 20px;
-        position: absolute; /* Added to position it on top */
-        top: 20px; /* Adjust as needed */
-        left: 50%; /* Center horizontally */
-        transform: translateX(-50%); /* Center alignment */
+        position: absolute; 
+        top: 20px; 
+        left: 50%; 
+        transform: translateX(-50%);
     }
     .header-title {
-        font-size: 3em; /* Adjust size as needed */
+        font-size: 3em; 
         font-weight: bold;
     }
     .span1 {
