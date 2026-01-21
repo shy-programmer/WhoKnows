@@ -217,5 +217,5 @@ This project is open-source and available under the **MIT License**.
 
 ## 👤 Author
 
-**Abdulazeez Arowolo**
+**Abdulazeez Arowolo (Shy Programmer)**
 GitHub: [https://github.com/shy-programmer](https://github.com/shy-programmer)
